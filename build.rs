@@ -10,13 +10,13 @@ pub fn main() {
     if RUST_VERSION.is_nightly() {
         println!("cargo:rustc-cfg=has_doc_cfg");
     }
-    emit_check_cfg("is_cabi_unwind_guarenteed_abort", None);
+    emit_check_cfg("is_cabi_unwind_guaranteed_abort", None);
     if RUST_VERSION.is_since_minor_version(1, 81) {
         // As of Rust 1.81, unwinding past an `extern "C"` function
-        // is guarenteed to unwind
+        // is guaranteed to unwind
         //
         // Before this release, it caused undefined behavior.
-        println!("cargo:rustc-cfg=is_cabi_unwind_guarenteed_abort");
+        println!("cargo:rustc-cfg=is_cabi_unwind_guaranteed_abort");
     }
     let target_arch = {
         let mut values = load_cargo_cfg_var("target_arch");
@@ -27,7 +27,7 @@ pub fn main() {
         );
         values.remove(0)
     };
-    // can't use matchs! due to MSRV
+    // can't use matches! due to MSRV
     #[allow(clippy::match_like_matches_macro)]
     let supported_arch = match &*target_arch {
         "x86_64" | "x86" | "arm" | "aarch64" => true,
