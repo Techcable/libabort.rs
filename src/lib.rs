@@ -164,9 +164,9 @@ fn fallback_abort() -> ! {
     ///
     /// ## Safety
     /// Must be a rust version where unwinding past
-    /// ABI boundaries is guarenteed to abort.
+    /// ABI boundaries is guaranteed to abort.
     ///
-    /// If this guarentee doesn't hold,
+    /// If this guarantee doesn't hold,
     /// this is undefined behavior.
     #[inline(never)]
     unsafe extern "C" fn cabi_unwind() -> ! {
@@ -196,12 +196,12 @@ fn fallback_abort() -> ! {
     };
     if PANIC_DOES_ABORT {
         do_panic()
-    } else if cfg!(is_cabi_unwind_guarenteed_abort) {
+    } else if cfg!(is_cabi_unwind_guaranteed_abort) {
         // SAFETY: On rust versions >= 1.81,
-        // unwinding past C ABI boundaries is guarenteed to abort
+        // unwinding past C ABI boundaries is guaranteed to abort
         unsafe { cabi_unwind() }
     } else {
-        // double panics are guarenteed to abort
+        // double panics are guaranteed to abort
         struct DoublePanicGuard;
         impl Drop for DoublePanicGuard {
             #[inline]
@@ -301,7 +301,7 @@ impl AbortGuard {
 
     /// Defuse the guard, preventing the drop function from calling [`abort`].
     ///
-    /// This is typically used after succesfull execution of some code.
+    /// This is typically used after successful execution of some code.
     #[inline]
     pub fn defuse(self) {
         core::mem::forget(self)
