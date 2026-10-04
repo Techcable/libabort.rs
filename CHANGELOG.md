@@ -12,6 +12,12 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+## v0.1.10
+Handle removal of `core::intrinsics::abort()` on nightly.
+
+Now uses `autocfg` so build won't fail when nightly functions are removed in the future.
+We migrated to the replacement function `core::process::abort_immediate()` (still nightly).
+
 ### Changes
 - Prefer `core::process::abort_immediate()` to `core::arch::wasm64::unreachable()` (tnyxtmnq)
 
