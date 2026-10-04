@@ -19,6 +19,7 @@ libc = { version = "0.2", optional = true, default-features = false }
 
 [build-dependencies]
 rustversion-detect = "0.3"
+autocfg = "1"
 
 [features]
 # Use the standard library abort function

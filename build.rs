@@ -1,5 +1,6 @@
 pub fn main() {
     let rust_version = rustversion_detect::detect_version().unwrap();
+    let autocfg = autocfg::AutoCfg::new().unwrap();
 
     // version detection
     emit_check_cfg("has_cfg_panic", None);
@@ -39,13 +40,16 @@ pub fn main() {
         // Requires `simd_wasm32` feature for the module (stable 1.33),
         // and the `unreachable_wasm32` feature for the function (stable 1.37)
         "wasm32-intrinsic"
-    } else if target_arch == "wasm64" && rust_version.is_nightly() {
+    } else if target_arch == "wasm64"
+        && rust_version.is_nightly()
+        && WASM64_UNREACHABLE.is_present(&autocfg)
+    {
         // Use core::arch::wasm64::unreachable() intrinsic
         //
         // Requires `simd_wasm64` feature for the module (unstable, issue #90599)
         emit_warning(&"The `wasm64` architecture is currently untested (issue #3)");
         "wasm64-intrinsic"
-    } else if rust_version.is_nightly() {
+    } else if rust_version.is_nightly() && CORE_INTRINSICS_ABORT.is_present(&autocfg) {
         // The `core::intrinsics` module requires nightly.
         // It is an "internal" feature that will never be directly stabilized.
         "core-intrinsics"
@@ -78,6 +82,49 @@ pub fn main() {
     println!("cargo:rustc-cfg=abort_impl=\"{}\"", abort_impl_name);
     // never need to be re-run
     println!("cargo:rerun-if-changed=build.rs");
+}
+
+const CORE_INTRINSICS_ABORT: NightlyAbortFunc = NightlyAbortFunc {
+    path: "core::intrinsics::abort",
+    feature: "core_intrinsics",
+    is_unsafe: false,
+};
+const WASM64_UNREACHABLE: NightlyAbortFunc = NightlyAbortFunc {
+    path: "core::arch::wasm64::unreachable",
+    feature: "simd_wasm64",
+    is_unsafe: false,
+};
+struct NightlyAbortFunc {
+    path: &'static str,
+    feature: &'static str,
+    is_unsafe: bool,
+}
+impl NightlyAbortFunc {
+    fn is_present(&self, cfg: &autocfg::AutoCfg) -> bool {
+        let probe = format!(
+            r##"
+            #![feature({feature})]
+            #![no_std]
+
+            fn do_abort() -> ! {{
+                {block} {{
+                    {func}();
+                }}
+            }}
+            "##,
+            block = if self.is_unsafe { "unsafe" } else { "" },
+            feature = self.feature,
+            func = self.path,
+        );
+        let res = cfg.probe_raw(&probe).is_ok();
+        if !res {
+            println!(
+                "cargo:warning=The `{}` function is missing on current nightly",
+                self.path
+            );
+        }
+        res
+    }
 }
 
 fn load_cargo_cfg_var(name: &'static str) -> Vec<String> {
