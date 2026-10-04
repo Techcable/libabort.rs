@@ -40,6 +40,10 @@ pub fn main() {
         // Requires `simd_wasm32` feature for the module (stable 1.33),
         // and the `unreachable_wasm32` feature for the function (stable 1.37)
         "wasm32-intrinsic"
+    } else if rust_version.is_nightly() && CORE_ABORT_IMMEDIATE.is_present(&autocfg) {
+        // The `core::process::abort_immediate()` function requires nightly.
+        // It is the successor to core::intrinsics::abort() which was a #[warn(internal_feature)]
+        "core-abort-immediate"
     } else if target_arch == "wasm64"
         && rust_version.is_nightly()
         && WASM64_UNREACHABLE.is_present(&autocfg)
@@ -49,10 +53,6 @@ pub fn main() {
         // Requires `simd_wasm64` feature for the module (unstable, issue #90599)
         emit_warning(&"The `wasm64` architecture is currently untested (issue #3)");
         "wasm64-intrinsic"
-    } else if rust_version.is_nightly() && CORE_ABORT_IMMEDIATE.is_present(&autocfg) {
-        // The `core::process::abort_immediate()` function requires nightly.
-        // It is the successor to core::intrinsics::abort() which was a #[warn(internal_feature)]
-        "core-abort-immediate"
     } else if supported_arch && rust_version.is_since_minor_version(1, 59) {
         "assembly"
     } else {

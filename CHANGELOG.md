@@ -12,6 +12,9 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 
 ## Unreleased
 
+### Changes
+- Prefer `core::process::abort_immediate()` to `core::arch::wasm64::unreachable()` (tnyxtmnq)
+
 ### Fixes
 - Use `autocfg` to check if nightly features work before using them (wulnptwt)
   - Avoids build failures caused by the removal of nightly functions.
