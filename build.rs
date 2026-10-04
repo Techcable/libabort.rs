@@ -1,17 +1,17 @@
-use rustversion_detect::RUST_VERSION;
-
 pub fn main() {
+    let rust_version = rustversion_detect::detect_version().unwrap();
+
     // version detection
     emit_check_cfg("has_cfg_panic", None);
-    if RUST_VERSION.is_since_minor_version(1, 60) {
+    if rust_version.is_since_minor_version(1, 60) {
         println!("cargo:rustc-cfg=has_cfg_panic");
     }
     emit_check_cfg("has_doc_cfg", None);
-    if RUST_VERSION.is_nightly() {
+    if rust_version.is_nightly() {
         println!("cargo:rustc-cfg=has_doc_cfg");
     }
     emit_check_cfg("is_cabi_unwind_guaranteed_abort", None);
-    if RUST_VERSION.is_since_minor_version(1, 81) {
+    if rust_version.is_since_minor_version(1, 81) {
         // As of Rust 1.81, unwinding past an `extern "C"` function
         // is guaranteed to unwind
         //
@@ -33,23 +33,23 @@ pub fn main() {
         "x86_64" | "x86" | "arm" | "aarch64" => true,
         _ => false,
     };
-    let trap_impl_name = if target_arch == "wasm32" && RUST_VERSION.is_since_minor_version(1, 37) {
+    let trap_impl_name = if target_arch == "wasm32" && rust_version.is_since_minor_version(1, 37) {
         // Use core::arch::wasm32::unreachable() intrinsic
         //
         // Requires `simd_wasm32` feature for the module (stable 1.33),
         // and the `unreachable_wasm32` feature for the function (stable 1.37)
         "wasm32-intrinsic"
-    } else if target_arch == "wasm64" && RUST_VERSION.is_nightly() {
+    } else if target_arch == "wasm64" && rust_version.is_nightly() {
         // Use core::arch::wasm64::unreachable() intrinsic
         //
         // Requires `simd_wasm64` feature for the module (unstable, issue #90599)
         emit_warning(&"The `wasm64` architecture is currently untested (issue #3)");
         "wasm64-intrinsic"
-    } else if RUST_VERSION.is_nightly() {
+    } else if rust_version.is_nightly() {
         // The `core::intrinsics` module requires nightly.
         // It is an "internal" feature that will never be directly stabilized.
         "core-intrinsics"
-    } else if supported_arch && RUST_VERSION.is_since_minor_version(1, 59) {
+    } else if supported_arch && rust_version.is_since_minor_version(1, 59) {
         "assembly"
     } else {
         "fallback"
