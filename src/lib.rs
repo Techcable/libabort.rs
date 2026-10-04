@@ -260,6 +260,7 @@ fn invoke_trap() -> ! {
     {
         core::intrinsics::abort()
     }
+    // SAFETY: It is safe to execute trap instructions
     #[cfg(trap_impl = "assembly")]
     unsafe {
         #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
