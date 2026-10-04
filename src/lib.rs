@@ -27,8 +27,7 @@
 //! [1.81]: https://blog.rust-lang.org/2024/09/05/Rust-1.81.0/
 #![cfg_attr(not(any(doc, feature = "std")), no_std)]
 #![cfg_attr(has_doc_cfg, feature(doc_cfg))] // doc_cfg only supported on nightly
-#![cfg_attr(trap_impl = "core-intrinsics", allow(internal_features))] // very stable in practice...
-#![cfg_attr(trap_impl = "core-intrinsics", feature(core_intrinsics))]
+#![cfg_attr(trap_impl = "core-abort-immediate", feature(abort_immediate))]
 #![cfg_attr(trap_impl = "wasm64-intrinsic", feature(simd_wasm64))] // currently unstable
 #![deny(
     dead_code, // Don't allow missing implementations
@@ -256,9 +255,9 @@ fn invoke_trap() -> ! {
         // TODO: Test this architecture (issue #3)
         core::arch::wasm64::unreachable()
     }
-    #[cfg(trap_impl = "core-intrinsics")]
+    #[cfg(trap_impl = "core-abort-immediate")]
     {
-        core::intrinsics::abort()
+        core::process::abort_immediate()
     }
     // SAFETY: It is safe to execute trap instructions
     #[cfg(trap_impl = "assembly")]

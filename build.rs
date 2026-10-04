@@ -49,10 +49,10 @@ pub fn main() {
         // Requires `simd_wasm64` feature for the module (unstable, issue #90599)
         emit_warning(&"The `wasm64` architecture is currently untested (issue #3)");
         "wasm64-intrinsic"
-    } else if rust_version.is_nightly() && CORE_INTRINSICS_ABORT.is_present(&autocfg) {
-        // The `core::intrinsics` module requires nightly.
-        // It is an "internal" feature that will never be directly stabilized.
-        "core-intrinsics"
+    } else if rust_version.is_nightly() && CORE_ABORT_IMMEDIATE.is_present(&autocfg) {
+        // The `core::process::abort_immediate()` function requires nightly.
+        // It is the successor to core::intrinsics::abort() which was a #[warn(internal_feature)]
+        "core-abort-immediate"
     } else if supported_arch && rust_version.is_since_minor_version(1, 59) {
         "assembly"
     } else {
@@ -61,7 +61,7 @@ pub fn main() {
     emit_check_cfg(
         "trap_impl",
         Some(vec![
-            "core-intrinsics",
+            "core-abort-immediate",
             "assembly",
             "wasm32-intrinsic",
             "wasm64-intrinsic",
@@ -84,9 +84,9 @@ pub fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 }
 
-const CORE_INTRINSICS_ABORT: NightlyAbortFunc = NightlyAbortFunc {
-    path: "core::intrinsics::abort",
-    feature: "core_intrinsics",
+const CORE_ABORT_IMMEDIATE: NightlyAbortFunc = NightlyAbortFunc {
+    path: "core::process::abort_immediate",
+    feature: "abort_immediate",
     is_unsafe: false,
 };
 const WASM64_UNREACHABLE: NightlyAbortFunc = NightlyAbortFunc {

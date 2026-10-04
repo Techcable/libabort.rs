@@ -16,6 +16,8 @@ Most changes include the relevant [jj](https://jj-vcs.dev) change ids in parens.
 - Use `autocfg` to check if nightly features work before using them (wulnptwt)
   - Avoids build failures caused by the removal of nightly functions.
 - Document use of unwinding past extern "C" on 1.81 (qmvsysnu)
+- On nightly, use `core::process::abort_immediately()` instead of `core::intrinsics::abort()` (mxmspryo)
+  - The latter has been removed on recent nightly versions.
 
 ## v0.1.9 - 2024-09-05
 On Rust 1.81, abort by unwinding past `extern "C"`
