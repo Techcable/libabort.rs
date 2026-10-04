@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-RUST_VERSION_PATTERN = re.compile(r"(\d+).(\d+).(\d+)")
+RUST_VERSION_PATTERN = re.compile(r"(\d+).(\d+)(?:.(\d+))?")
 
 
 def parse_rust_version(version):
@@ -20,7 +20,14 @@ def parse_rust_version(version):
         mtch = RUST_VERSION_PATTERN.fullmatch(version)
         if mtch is None:
             fatal(f"Invalid rust version: {version!r}")
-        return tuple(map(int, mtch.groups()))
+        major = int(mtch[0])
+        minor = int(mtch[1])
+        patch = mtch[2]
+        if patch is None:
+            patch = 0
+        else:
+            patch = int(patch)
+        return (major, minor, patch)
 
 
 def fatal(msg):
