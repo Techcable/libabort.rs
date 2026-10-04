@@ -37,4 +37,3 @@ abort-via-trap = []
 [package.metadata.docs.rs]
 # Enable features needed to document `immediate_abort`
 features = ["std", "libc"]
-
